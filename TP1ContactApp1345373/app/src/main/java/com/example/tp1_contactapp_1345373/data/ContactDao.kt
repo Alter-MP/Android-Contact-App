@@ -19,13 +19,10 @@ interface ContactDao {
     @Query("SELECT * FROM contacts")
     fun getAll(): Flow<List<Contact>>
 
-    @Query("SELECT * FROM contacts WHERE uid IN (:userIds)")
-    fun loadAllByIds(userIds: IntArray): Flow<List<Contact>>
-
-    @Query("SELECT * FROM contacts ORDER by lastName ASC")
+    @Query("SELECT * FROM contacts ORDER by lastName ASC, firstName ASC")
     fun getAllSortedByLastNameAscending(): Flow<List<Contact>>
 
-    @Query("SELECT * FROM contacts ORDER by lastName DESC")
+    @Query("SELECT * FROM contacts ORDER by lastName DESC, firstName DESC")
     fun getAllSortedByLastNameDescending(): Flow<List<Contact>>
 
     // UPDATE
