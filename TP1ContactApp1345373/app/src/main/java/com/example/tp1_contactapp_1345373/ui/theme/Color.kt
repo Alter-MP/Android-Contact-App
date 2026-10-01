@@ -2,10 +2,27 @@ package com.example.tp1_contactapp_1345373.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+/// Common
+val ArasakaWhite = Color(0xFFFFFFFF)
+val ArasakaBlack = Color(0xFF0B0B0D)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+/// DarkColorScheme
+// Primary
+val ArasakaNeonRed = Color(0xFFFF4D5A)
+
+// Secondary
+val ArasakaSilverGrey = Color(0xFFC9C9CF)
+
+// Error
+val ArasakaAmberOrange = Color(0xFFFFB74D)
+
+
+/// LightColorScheme
+// Primary
+val ArasakaRed = Color(0xFFD10A1E)
+
+// Secondary
+val ArasakaSteelGrey = Color(0xFF4A4A52)
+
+// Error
+val ArasakaBurntOrange = Color(0xFFB35C00)
