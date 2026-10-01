@@ -1,6 +1,9 @@
 package com.example.tp1_contactapp_1345373.data
 
 import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -9,9 +12,26 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.text.insert
 
 class ContactViewModel(application: Application) : AndroidViewModel(application) {
+
+    var screen by mutableStateOf(Screen.CONTACT_LIST)
+
+    var selectedContact by mutableStateOf(Contact())
+
+    fun openExistingContact(contact: Contact) {
+        selectedContact = contact
+        screen = Screen.CONTACT_FORM
+    }
+
+    fun openNewContact() {
+        openExistingContact(Contact())
+    }
+
+    fun returnToList() {
+        screen = Screen.CONTACT_LIST
+    }
+
     private val dao: ContactDao =
         AppDatabase.getDatabase(application.applicationContext).contactDao()
     private val stopTimeoutMillis: Long = 5000
