@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,6 +59,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.window.core.layout.WindowSizeClass
 import com.example.tp1_contactapp_1345373.data.Contact
 import com.example.tp1_contactapp_1345373.data.ContactViewModel
 import com.example.tp1_contactapp_1345373.data.Screen
@@ -71,26 +74,39 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+            val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
+
             TP1ContactApp1345373Theme {
-                ContactApp(contactViewModel)
+                ContactApp(contactViewModel, windowSizeClass)
             }
         }
     }
 
     @Composable
-    fun ContactApp(contactViewModel: ContactViewModel, modifier: Modifier = Modifier) {
+    fun ContactApp(
+        contactViewModel: ContactViewModel,
+        windowSizeClass: WindowSizeClass,
+        modifier: Modifier = Modifier
+    ) {
 
-        val context = LocalContext.current
+        val isExpanded = windowSizeClass.isWidthAtLeastBreakpoint(
+            WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+        )
 
         val contacts by contactViewModel.contacts.collectAsState()
         val screen = contactViewModel.screen
         val selectedContact = contactViewModel.selectedContact
 
-        val fullName = "${selectedContact.firstName} ${selectedContact.lastName}"
+        val context = LocalContext.current
         val messageAdded = stringResource(R.string.toast_addContact)
         val messageUpdated = stringResource(R.string.toast_updateContact)
         val messageDeleted = stringResource(R.string.toast_deleteContact)
         val messageEmptyField = stringResource(R.string.toast_emptyField_error)
+
+        val fullName = "${selectedContact.firstName} ${selectedContact.lastName}"
+
+        val isContactFormVisible = isExpanded || screen == Screen.CONTACT_FORM
 
         fun showToast(
             context: Context,
@@ -175,24 +191,47 @@ class MainActivity : ComponentActivity() {
 
         ) { innerPadding ->
 
-            when (screen) {
-                Screen.CONTACT_LIST -> ContactList(
-                    contacts = contacts,
-                    onClick = { contactViewModel.openExistingContact(it) },
-                    modifier = Modifier.padding(innerPadding)
-                )
+            if (isExpanded) {
+                Row(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                ) {
+                    ContactList(
+                        contacts = contacts,
+                        onContactClick = { contactViewModel.selectedContact = it },
+                        modifier = Modifier.weight(0.3f).fillMaxHeight()
+                    )
 
-                Screen.CONTACT_FORM -> ContactForm(
-                    contact = selectedContact,
-                    onContactSave = { contactViewModel.selectedContact = it },
-                    onCameraClick = { TODO() },
-                    onGalleryClick = { TODO() },
-                    modifier = Modifier.padding(innerPadding)
-                )
+                    VerticalDivider()
+
+                    ContactForm(
+                        contact = selectedContact,
+                        onContactSave = { contactViewModel.selectedContact = it },
+                        onCameraClick = { TODO() },
+                        onGalleryClick = { TODO() },
+                        modifier = Modifier.weight(0.7f).fillMaxHeight()
+                    )
+                }
+            } else {
+
+                when (screen) {
+                    Screen.CONTACT_LIST -> ContactList(
+                        contacts = contacts,
+                        onContactClick = { contactViewModel.openExistingContact(it) },
+                        modifier = Modifier.padding(innerPadding)
+                    )
+
+                    Screen.CONTACT_FORM -> ContactForm(
+                        contact = selectedContact,
+                        onContactSave = { contactViewModel.selectedContact = it },
+                        onCameraClick = { TODO() },
+                        onGalleryClick = { TODO() },
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
             }
-
         }
-
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -277,7 +316,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ContactList(
         contacts: List<Contact>,
-        onClick: (Contact) -> Unit,
+        onContactClick: (Contact) -> Unit,
         modifier: Modifier = Modifier,
     ) {
 
@@ -300,13 +339,12 @@ class MainActivity : ComponentActivity() {
             ) {
                 items(
                     contacts,
-                    key = { it.uid }
 
-                ) { contact ->
+                    ) { contact ->
 
                     ContactItemDetails(
                         contact,
-                        { onClick(contact) }
+                        { onContactClick(contact) }
                     )
 
                     HorizontalDivider()
