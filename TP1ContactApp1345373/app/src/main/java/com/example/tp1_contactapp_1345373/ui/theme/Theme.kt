@@ -12,21 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = ArasakaNeonRed,
-    onPrimary = ArasakaBlack,
-    secondary = ArasakaSilverGrey,
-    onSecondary = ArasakaBlack,
-    error = ArasakaAmberOrange,
-    onError = ArasakaBlack
+    primary = NeonRed,
+    onPrimary = Black,
+    secondary = SilverGrey,
+    onSecondary = Black,
+    error = AmberOrange,
+    onError = Black
 )
-
 private val LightColorScheme = lightColorScheme(
-    primary = ArasakaRed,
-    onPrimary = ArasakaWhite,
-    secondary = ArasakaSteelGrey,
-    onSecondary = ArasakaWhite,
-    error = ArasakaBurntOrange,
-    onError = ArasakaWhite
+    primary = Red,
+    onPrimary = White,
+    secondary = SteelGrey,
+    onSecondary = White,
+    error = BurntOrange,
+    onError = White
 
 )
 
@@ -43,8 +42,8 @@ fun TP1ContactApp1345373Theme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> LightColorScheme
+        else -> DarkColorScheme
     }
 
     MaterialTheme(

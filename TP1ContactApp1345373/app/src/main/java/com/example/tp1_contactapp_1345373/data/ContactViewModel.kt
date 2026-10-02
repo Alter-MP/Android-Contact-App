@@ -16,9 +16,7 @@ import kotlinx.coroutines.launch
 class ContactViewModel(application: Application) : AndroidViewModel(application) {
 
     var screen by mutableStateOf(Screen.CONTACT_LIST)
-
     var selectedContact by mutableStateOf(Contact())
-
     fun openExistingContact(contact: Contact) {
         selectedContact = contact
         screen = Screen.CONTACT_FORM
@@ -42,7 +40,6 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
     }
 
     // READ
-
     val contacts: StateFlow<List<Contact>> = dao.getAll()
         .stateIn(
             scope = viewModelScope,

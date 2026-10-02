@@ -1,3 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TP1-ContactApp-1345373</string>
+
+    <string name="title">Contacts</string>
+
+    <string name="no_contacts">Aucun Contact dans la liste…</string>
+
+    <string name="label_firstName">Prénom</string>
+    <string name="label_lastName">Nom</string>
+    <string name="label_phoneNumber"># Téléphone</string>
+    <string name="label_age">Âge</string>
+    <string name="label_email">Courriel</string>
+    <string name="label_address">Addresse</string>
+
+    <string name="button_camera">Caméra</string>
+    <string name="button_gallery">Galerie</string>
+    <string name="button_cancel">Annuler</string>
+    <string name="button_save">Enregistrer</string>
+
+    <string name="icon_favorite">★</string>
+    <string name="favorite">Favori</string>
+
+    <string name="toast_addContact">Nouveau Contact Ajouté</string>
+    <string name="toast_updateContact">Contact Modifié</string>
+    <string name="toast_deleteContact">Contact Supprimé</string>
+    <string name="toast_emptyField_error">Veuillez remplir les champs obligatoires : Prénom, Nom, # Téléphone</string>
+
 </resources>

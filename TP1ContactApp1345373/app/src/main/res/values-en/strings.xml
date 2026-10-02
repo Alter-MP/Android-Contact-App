@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TP1-ContactApp-1345373</string>
+
+    <string name="title">Contacts</string>
+
+    <string name="no_contacts">No Contact in the list…</string>
+
+    <string name="label_firstName">First Name</string>
+    <string name="label_lastName">Last Name</string>
+    <string name="label_phoneNumber"># Phone Number</string>
+    <string name="label_age">Age</string>
+    <string name="label_email">Email</string>
+    <string name="label_address">Address</string>
+
+    <string name="button_camera">Camera</string>
+    <string name="button_gallery">Gallery</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_save">Save</string>
+
+    <string name="icon_favorite">★</string>
+    <string name="favorite">Favorite</string>
+
+    <string name="toast_addContact">New Contact Added</string>
+    <string name="toast_updateContact">Contact Updated</string>
+    <string name="toast_deleteContact">Contact Deleted</string>
+    <string name="toast_emptyField_error">Please fill in all required fields : First Name, Last Name, # Phone Number</string>
+
+</resources>
