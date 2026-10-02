@@ -54,14 +54,7 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
             initialValue = emptyList()
         )
 
-    val contactSortedAscending: StateFlow<List<Contact>> = dao.getAllSortedByLastNameAscending()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-            initialValue = emptyList()
-        )
-
-    val contactSortedDescending: StateFlow<List<Contact>> = dao.getAllSortedByLastNameDescending()
+    val contactSortedDescending: StateFlow<List<Contact>> = dao.getAllSortedDescending()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
