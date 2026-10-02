@@ -16,14 +16,11 @@ interface ContactDao {
     suspend fun insert(contact: Contact)
 
     // READ
-    @Query("SELECT * FROM contacts")
+    @Query("SELECT * FROM contacts ORDER BY lastName ASC, firstName ASC")
     fun getAll(): Flow<List<Contact>>
 
-    @Query("SELECT * FROM contacts ORDER by lastName ASC, firstName ASC")
-    fun getAllSortedByLastNameAscending(): Flow<List<Contact>>
-
     @Query("SELECT * FROM contacts ORDER by lastName DESC, firstName DESC")
-    fun getAllSortedByLastNameDescending(): Flow<List<Contact>>
+    fun getAllSortedDescending(): Flow<List<Contact>>
 
     // UPDATE
     @Update
