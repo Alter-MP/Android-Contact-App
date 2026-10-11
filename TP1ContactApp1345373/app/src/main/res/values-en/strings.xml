@@ -7,6 +7,11 @@
 
     <string name="no_contacts">No Contact in the list…</string>
 
+    <!-- TOP BAR -->
+    <string name="icon_addContact">Add contact</string>
+    <string name="icon_deleteContact">Delete contact</string>
+
+    <!-- FORM LABELS -->
     <string name="label_firstName">First Name</string>
     <string name="label_lastName">Last Name</string>
     <string name="label_phoneNumber"># Phone Number</string>
@@ -14,14 +19,20 @@
     <string name="label_email">Email</string>
     <string name="label_address">Address</string>
 
+    <!-- CAM BOUTONS -->
     <string name="button_camera">Camera</string>
     <string name="button_gallery">Gallery</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_save">Save</string>
 
+    <!-- PHOTO -->
+    <string name="desc_contactPhoto">Contact Photo</string>
+
+    <!-- FAVORITE -->
     <string name="icon_favorite">★</string>
     <string name="favorite">Favorite</string>
 
+    <!-- TOASTS -->
     <string name="toast_addContact">New Contact Added</string>
     <string name="toast_updateContact">Contact Updated</string>
     <string name="toast_deleteContact">Contact Deleted</string>

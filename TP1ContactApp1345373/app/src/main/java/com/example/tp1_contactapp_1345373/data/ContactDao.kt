@@ -65,5 +65,4 @@ interface ContactDao {
     )
     fun getFavorites(): Flow<List<Contact>>
 
-
 }

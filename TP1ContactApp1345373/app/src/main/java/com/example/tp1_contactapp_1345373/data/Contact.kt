@@ -3,10 +3,11 @@ package com.example.tp1_contactapp_1345373.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+// Table de données backend
 @Entity(tableName = "contacts")
 data class Contact (
     @PrimaryKey(autoGenerate = true)
-    val uid:             Int = 0,
+    val uid:            Int = 0,
     val firstName:      String = "",
     val lastName:       String = "",
     val phoneNumber:    String = "",

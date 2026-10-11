@@ -32,7 +32,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun TP1ContactApp1345373Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -42,8 +41,8 @@ fun TP1ContactApp1345373Theme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> LightColorScheme
-        else -> DarkColorScheme
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
     }
 
     MaterialTheme(

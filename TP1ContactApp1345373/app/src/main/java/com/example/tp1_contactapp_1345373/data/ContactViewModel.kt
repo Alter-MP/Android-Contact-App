@@ -1,8 +1,15 @@
 package com.example.tp1_contactapp_1345373.data
 
 import android.app.Application
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,8 +22,15 @@ import kotlinx.coroutines.launch
 
 class ContactViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val dao: ContactDao =
+        AppDatabase.getDatabase(application.applicationContext).contactDao()
+
+    private val stopTimeoutMillis: Long = 5000
+
     var screen by mutableStateOf(Screen.CONTACT_LIST)
     var selectedContact by mutableStateOf(Contact())
+
+    // NAVIGATION
     fun openExistingContact(contact: Contact) {
         selectedContact = contact
         screen = Screen.CONTACT_FORM
@@ -30,9 +44,81 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         screen = Screen.CONTACT_LIST
     }
 
-    private val dao: ContactDao =
-        AppDatabase.getDatabase(application.applicationContext).contactDao()
-    private val stopTimeoutMillis: Long = 5000
+    // FORM
+    fun saveSelectContact(isExpanded: Boolean = false): ContactSaveStatus {
+
+        if (
+
+            selectedContact.firstName.isBlank() ||
+            selectedContact.lastName.isBlank() ||
+            selectedContact.phoneNumber.isBlank()
+
+        ) {
+            return ContactSaveStatus.ERROR_EMPTY_FIELDS
+        }
+
+        val existingContact = contacts.value.find { it.uid == selectedContact.uid }
+
+        val result =
+            if (existingContact == null) {
+
+                add(selectedContact)
+                ContactSaveStatus.ADD
+
+            } else {
+
+                update(selectedContact)
+                ContactSaveStatus.UPDATE
+
+            }
+
+        completeForm(isExpanded)
+
+        return result
+    }
+
+    private fun completeForm(isExpanded: Boolean) {
+
+        returnToList()
+
+        if (isExpanded) {
+            selectedContact = Contact()
+        }
+    }
+
+    fun deleteSelectedContact(isExpanded: Boolean = false) {
+
+        delete(selectedContact)
+
+        completeForm(isExpanded)
+    }
+
+    fun cancelFormChange(isExpanded: Boolean = false) {
+
+        if (!isExpanded) {
+            returnToList()
+
+        } else {
+            selectedContact = contacts.value.find { it.uid == selectedContact.uid } ?: Contact()
+        }
+    }
+
+    // CAMERA
+    var pendingUri by mutableStateOf<Uri?>(null)
+    var photoUri by mutableStateOf<Uri?>(null)
+
+    fun createImageUri(context: Context): Uri? {
+
+        val values = ContentValues().apply {
+
+            put(MediaStore.Images.Media.MIME_TYPE, "/image/jpeg")
+            put(MediaStore.Images.Media.DISPLAY_NAME, "photo_${System.currentTimeMillis()}.jpg")
+        }
+
+        return context.contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
+        )
+    }
 
     // CREATE
     fun add(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {

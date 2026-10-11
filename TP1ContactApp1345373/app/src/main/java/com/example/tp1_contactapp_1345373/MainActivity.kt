@@ -1,12 +1,15 @@
 package com.example.tp1_contactapp_1345373
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.os.Bundle
 import android.telephony.PhoneNumberUtils
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -60,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.window.core.layout.WindowSizeClass
+import com.example.tp1_contactapp_1345373.components.ContactTopBar
 import com.example.tp1_contactapp_1345373.data.Contact
 import com.example.tp1_contactapp_1345373.data.ContactViewModel
 import com.example.tp1_contactapp_1345373.data.Screen
@@ -67,7 +72,7 @@ import com.example.tp1_contactapp_1345373.ui.theme.TP1ContactApp1345373Theme
 
 class MainActivity : ComponentActivity() {
 
-    private val TAG = "CONTACT"
+    // private val TAG = "CONTACT"
     private val contactViewModel: ContactViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,52 +125,21 @@ class MainActivity : ComponentActivity() {
             ).show()
         }
 
-        fun saveContact() {
 
-            if (
-                selectedContact.firstName == "" ||
-                selectedContact.lastName == "" ||
-                selectedContact.phoneNumber == ""
-            ) {
+        val takePicture = rememberLauncherForActivityResult(
 
-                showToast(
-                    context,
-                    messageEmptyField,
-                    Toast.LENGTH_LONG
-                )
+            contract = ActivityResultContracts.TakePicture()
 
-            } else {
+        ) { success ->
 
-                if (selectedContact.uid == 0) {
-                    contactViewModel.add(selectedContact)
+            val uri = contactViewModel.pendingUri
 
-                    showToast(
-                        context,
-                        "$messageAdded : $fullName ",
-                    )
-                    contactViewModel.returnToList()
-                } else {
-                    contactViewModel.update(selectedContact)
-
-                    showToast(
-                        context,
-                        "$messageUpdated : $fullName ",
-                    )
-                    contactViewModel.returnToList()
-                }
+            if (success && uri != null) {
+                contactViewModel.photoUri = uri
+            } else if (uri != null) {
+                context.contentResolver.delete(uri, null, null)
             }
-        }
-
-        fun deleteSelectedContact() {
-
-            contactViewModel.delete(selectedContact)
-
-            showToast(
-                context,
-                "$messageDeleted : $fullName ",
-
-                )
-            contactViewModel.returnToList()
+            contactViewModel.pendingUri = null
         }
 
         Scaffold(
@@ -192,15 +166,19 @@ class MainActivity : ComponentActivity() {
         ) { innerPadding ->
 
             if (isExpanded) {
+
                 Row(
                     modifier = Modifier
                         .padding(innerPadding)
                         .fillMaxSize()
                 ) {
+
                     ContactList(
                         contacts = contacts,
                         onContactClick = { contactViewModel.selectedContact = it },
-                        modifier = Modifier.weight(0.3f).fillMaxHeight()
+                        modifier = Modifier
+                            .weight(0.3f)
+                            .fillMaxHeight()
                     )
 
                     VerticalDivider()
@@ -208,14 +186,27 @@ class MainActivity : ComponentActivity() {
                     ContactForm(
                         contact = selectedContact,
                         onContactSave = { contactViewModel.selectedContact = it },
-                        onCameraClick = { TODO() },
-                        onGalleryClick = { TODO() },
-                        modifier = Modifier.weight(0.7f).fillMaxHeight()
+                        onCameraClick = {
+                            val uri = contactViewModel.createImageUri(context) ?: return@ContactForm
+                            contactViewModel.pendingUri = uri
+
+                            try {
+                                takePicture.launch(uri)
+                            } catch (e: ActivityNotFoundException) {
+                                context.contentResolver.delete(uri, null, null)
+                                contactViewModel.pendingUri = null
+                            }
+                        },
+                        onGalleryClick = { /*TODO()*/ },
+                        modifier = Modifier
+                            .weight(0.7f)
+                            .fillMaxHeight()
                     )
                 }
             } else {
 
                 when (screen) {
+
                     Screen.CONTACT_LIST -> ContactList(
                         contacts = contacts,
                         onContactClick = { contactViewModel.openExistingContact(it) },
@@ -225,337 +216,12 @@ class MainActivity : ComponentActivity() {
                     Screen.CONTACT_FORM -> ContactForm(
                         contact = selectedContact,
                         onContactSave = { contactViewModel.selectedContact = it },
-                        onCameraClick = { TODO() },
-                        onGalleryClick = { TODO() },
+                        onCameraClick = { /*TODO()*/ },
+                        onGalleryClick = { /*TODO()*/ },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
         }
     }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ContactTopBar(
-        screen: Screen,
-        canDelete: Boolean,
-        onAddContactClick: () -> Unit,
-        onDeleteContactClick: () -> Unit,
-    ) {
-
-        TopAppBar(
-            title = {
-                Text(
-                    text = stringResource(R.string.title),
-                    style = MaterialTheme.typography.titleLarge
-                )
-            },
-            actions = {
-                when (screen) {
-                    Screen.CONTACT_LIST -> IconButton(onClick = { onAddContactClick() }) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "AddIcon"
-                        )
-                    }
-
-                    Screen.CONTACT_FORM -> if (canDelete) {
-                        IconButton(onClick = { onDeleteContactClick() }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "DeleteIcon"
-                            )
-                        }
-                    }
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        )
-    }
-
-    @Composable
-    fun ContactItemDetails(contact: Contact, onContactDetailsClick: () -> Unit) {
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onContactDetailsClick() }
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            ContactPhoto(modifier = Modifier.size(46.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "${contact.firstName} ${contact.lastName}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    text = PhoneNumberUtils.formatNumber(contact.phoneNumber, "CA"),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            if (contact.isFavorite) {
-                Text(
-                    text = stringResource(R.string.icon_favorite),
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.error
-
-                )
-            }
-        }
-    }
-
-    @Composable
-    fun ContactList(
-        contacts: List<Contact>,
-        onContactClick: (Contact) -> Unit,
-        modifier: Modifier = Modifier,
-    ) {
-
-        if (contacts.isEmpty()) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = stringResource(R.string.no_contacts),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(18.dp)
-                )
-            }
-
-        } else {
-
-            LazyColumn(
-                modifier = modifier,
-            ) {
-                items(
-                    contacts,
-
-                    ) { contact ->
-
-                    ContactItemDetails(
-                        contact,
-                        { onContactClick(contact) }
-                    )
-
-                    HorizontalDivider()
-
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun ContactForm(
-        contact: Contact,
-        onContactSave: (Contact) -> Unit,
-        onCameraClick: () -> Unit,
-        onGalleryClick: () -> Unit,
-        modifier: Modifier = Modifier
-    ) {
-
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier
-                .fillMaxSize()
-                .verticalScroll((rememberScrollState()))
-                .padding(10.dp)
-        ) {
-
-            ContactPhoto(Modifier.size(124.dp))
-            ContactPhotoButtons(onCameraClick = onCameraClick, onGalleryClick = onGalleryClick)
-
-            ContactFormTextField(
-                contact.firstName,
-                { onContactSave(contact.copy(firstName = it.trim())) },
-                stringResource(R.string.label_firstName),
-            )
-
-            ContactFormTextField(
-                contact.lastName,
-                { onContactSave(contact.copy(lastName = it.trim())) },
-                stringResource(R.string.label_lastName),
-            )
-
-            ContactFormTextField(
-                contact.phoneNumber,
-                { onContactSave(contact.copy(phoneNumber = it.trim())) },
-                stringResource(R.string.label_phoneNumber),
-                KeyboardType.Phone,
-            )
-
-            ContactFormTextField(
-                valueText = if (contact.age == null) {
-                    ""
-                } else {
-                    contact.age.toString()
-                },
-                onValueChange = {
-                    val newAge = if (it == "") {
-                        null
-                    } else {
-                        it.toIntOrNull() ?: contact.age
-                    }
-                    onContactSave(contact.copy(age = newAge))
-                },
-                labelText = stringResource(R.string.label_age),
-                keyboardType = KeyboardType.Number
-
-            )
-
-            ContactFormTextField(
-                contact.email,
-                { onContactSave(contact.copy(email = it.trim())) },
-                stringResource(R.string.label_email),
-                KeyboardType.Email,
-            )
-
-            ContactFormTextField(
-                contact.address,
-                { onContactSave(contact.copy(address = it.trim())) },
-                stringResource(R.string.label_address),
-            )
-
-            FavoriteCheckbox(
-                isFavorite = contact.isFavorite,
-                onFavoriteChange = { onContactSave(contact.copy(isFavorite = it)) }
-            )
-
-
-        }
-    }
-
-    @Composable
-    fun ContactPhoto(modifier: Modifier = Modifier) {
-        Icon(
-            imageVector = Icons.Default.AccountCircle,
-            contentDescription = "ContactPhoto",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = modifier,
-        )
-    }
-
-    @Composable
-    fun ContactPhotoButtons(
-        onCameraClick: () -> Unit,
-        onGalleryClick: () -> Unit,
-    ) {
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Button(onClick = { onCameraClick() }) {
-                Text(
-                    text = stringResource(R.string.button_camera)
-                )
-            }
-
-            Button(onClick = { onGalleryClick() }) {
-                Text(
-                    text = stringResource(R.string.button_gallery)
-                )
-            }
-        }
-    }
-
-
-    @Composable
-    fun ContactFormTextField(
-        valueText: String,
-        onValueChange: (String) -> Unit,
-        labelText: String,
-        keyboardType: KeyboardType = KeyboardType.Text
-    ) {
-        OutlinedTextField(
-            value = valueText,
-            onValueChange = { onValueChange(it) },
-            label = {
-                Text(
-                    text = labelText
-                )
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-        )
-    }
-
-    @Composable
-    fun FavoriteCheckbox(isFavorite: Boolean, onFavoriteChange: (Boolean) -> Unit) {
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .toggleable(value = isFavorite, onValueChange = { onFavoriteChange(it) })
-                .padding(16.dp)
-        ) {
-            Checkbox(checked = isFavorite, onCheckedChange = null)
-            Text(
-                text = stringResource(R.string.favorite)
-            )
-        }
-    }
-
-    @Composable
-    fun ContactBottomBar(
-        onCancelClick: () -> Unit,
-        onSaveContactClick: () -> Unit,
-    ) {
-
-        BottomAppBar(
-            containerColor = Color.Transparent
-        ) {
-            LazyRow(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxSize()
-            ) {
-
-                item {
-                    Text(
-                        text = stringResource(R.string.button_cancel),
-                        color = MaterialTheme.colorScheme.secondary,
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier
-                            .clickable { onCancelClick() }
-                            .padding(horizontal = 24.dp, vertical = 12.dp)
-                    )
-                }
-
-                item {
-                    VerticalDivider(
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.height(24.dp)
-                    )
-                }
-
-                item {
-                    Text(
-                        text = stringResource(R.string.button_save),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier
-                            .clickable { onSaveContactClick() }
-                            .padding(horizontal = 24.dp, vertical = 12.dp)
-                    )
-                }
-            }
-        }
-    }
-
-}
 
