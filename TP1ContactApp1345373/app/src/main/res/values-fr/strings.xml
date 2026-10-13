@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- APP -->
+    <string name="app_name">TP01-ContactApp-1345373</string>
+    <string name="title">Contacts</string>
+    <string name="label_search">Rechercher…</string>
+    <string name="no_contacts">Aucun Contact dans la liste…</string>
+    <string name="no_search_results">Aucun Contact trouvé…</string>
+    <string name="settings_darkMode">Mode sombre</string>
+
+    <!-- TOP BAR -->
+    <string name="icon_addContact">Ajouter contact</string>
+    <string name="icon_deleteContact">Supprimer contact</string>
+    <string name="icon_favoritesFilter">Afficher Favoris</string>
+    <string name="icon_sort">Trier Ordre Alphabétique</string>
+    <string name="icon_search">Recherche Contact</string>
+
+    <!-- FORM LABELS -->
+    <string name="label_firstName">Prénom</string>
+    <string name="label_lastName">Nom</string>
+    <string name="label_phoneNumber"># Téléphone</string>
+    <string name="label_age">Âge</string>
+    <string name="label_email">Courriel</string>
+    <string name="label_address">Addresse</string>
+
+    <!-- CAM BOUTONS -->
+    <string name="button_camera">Caméra</string>
+    <string name="button_gallery">Galerie</string>
+    <string name="button_cancel">Annuler</string>
+    <string name="button_save">Enregistrer</string>
+
+    <!-- PHOTO -->
+    <string name="desc_contactPhoto">Contact Photo</string>
+
+
+    <!-- FAVORITE -->
+    <string name="icon_favorite">★</string>
+    <string name="favorite">Favori</string>
+
+    <!-- TOASTS -->
+    <string name="toast_addContact">Nouveau Contact Ajouté</string>
+    <string name="toast_updateContact">Contact Modifié</string>
+    <string name="toast_deleteContact">Contact Supprimé</string>
+    <string name="toast_emptyField_error">Veuillez remplir les champs obligatoires : Prénom, Nom, # Téléphone</string>
+
+</resources>

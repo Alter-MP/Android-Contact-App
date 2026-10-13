@@ -32,14 +32,15 @@ private fun ContactFormTextField(
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
     OutlinedTextField(
-        value = valueText,
-        onValueChange = { onValueChange(it) },
+        valueText,
+        { onValueChange(it) },
         label = {
             Text(
                 text = labelText
             )
         },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        singleLine = true,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -85,25 +86,26 @@ fun ContactForm(
     ) {
 
         ContactPhoto(contact, Modifier.size(124.dp))
+
         ContactPhotoButtons(onCameraClick = onCameraClick, onGalleryClick = onGalleryClick)
 
         ContactFormTextField(
             contact.firstName,
-            { onContactSave(contact.copy(firstName = it.trim())) },
+            { onContactSave(contact.copy(firstName = it)) },
             stringResource(R.string.label_firstName),
         )
 
         ContactFormTextField(
             contact.lastName,
-            { onContactSave(contact.copy(lastName = it.trim())) },
+            { onContactSave(contact.copy(lastName = it)) },
             stringResource(R.string.label_lastName),
         )
 
         ContactFormTextField(
             contact.phoneNumber,
-            { onContactSave(contact.copy(phoneNumber = it.trim())) },
+            { onContactSave(contact.copy(phoneNumber = it)) },
             stringResource(R.string.label_phoneNumber),
-            KeyboardType.Number,
+            KeyboardType.Phone,
         )
 
         ContactFormTextField(
@@ -127,14 +129,14 @@ fun ContactForm(
 
         ContactFormTextField(
             contact.email,
-            { onContactSave(contact.copy(email = it.trim())) },
+            { onContactSave(contact.copy(email = it)) },
             stringResource(R.string.label_email),
             KeyboardType.Email,
         )
 
         ContactFormTextField(
             contact.address,
-            { onContactSave(contact.copy(address = it.trim())) },
+            { onContactSave(contact.copy(address = it)) },
             stringResource(R.string.label_address),
         )
 

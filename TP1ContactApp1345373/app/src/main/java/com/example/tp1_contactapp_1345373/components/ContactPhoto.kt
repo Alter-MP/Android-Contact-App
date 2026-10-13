@@ -1,7 +1,5 @@
 package com.example.tp1_contactapp_1345373.components
 
-import android.R.attr.maxWidth
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.PhotoAlbum
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,22 +19,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.tp1_contactapp_1345373.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import com.example.tp1_contactapp_1345373.data.Contact
 import androidx.core.net.toUri
+import coil3.compose.AsyncImage
+import com.example.tp1_contactapp_1345373.R
+import com.example.tp1_contactapp_1345373.data.Contact
 
 @Composable
 fun ContactPhoto(contact: Contact, modifier: Modifier = Modifier) {
 
     val contactInitials = (contact.firstName.take(1) + contact.lastName.take(1)).uppercase()
-
 
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
@@ -46,7 +45,7 @@ fun ContactPhoto(contact: Contact, modifier: Modifier = Modifier) {
             .padding(maxWidth / 12)
             .clip((CircleShape))
 
-        val initialsFontSize = (maxWidth.value * 0.35f).sp
+        val initialsFontSize = (maxWidth.value * 0.4f).sp
 
         when {
 
@@ -76,7 +75,7 @@ fun ContactPhoto(contact: Contact, modifier: Modifier = Modifier) {
                    imageVector = Icons.Default.AccountCircle,
                     contentDescription = stringResource(R.string.desc_contactPhoto),
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = photoModifier
                 )
         }
 
@@ -96,11 +95,19 @@ fun ContactPhotoButtons(
             Text(
                 text = stringResource(R.string.button_camera)
             )
+            Icon(
+                imageVector = Icons.Default.PhotoCamera,
+                contentDescription = stringResource(R.string.button_camera)
+            )
         }
 
         Button(onClick = { onGalleryClick() }) {
             Text(
                 text = stringResource(R.string.button_gallery)
+            )
+            Icon(
+                imageVector = Icons.Default.PhotoAlbum,
+                contentDescription = stringResource(R.string.button_gallery)
             )
         }
     }

@@ -1,8 +1,13 @@
 package com.example.tp1_contactapp_1345373.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,24 +22,62 @@ import com.example.tp1_contactapp_1345373.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactTopBar(
-    showAddContactButton: Boolean,
+    showActionsButtons: Boolean,
     showDeleteContactButton: Boolean,
+    isFavoritesFilter: Boolean,
+    isDarkMode: Boolean,
     onAddContactClick: () -> Unit,
+    onSortContactClick: () -> Unit,
+    onFavoritesFilterClick: () -> Unit,
     onDeleteContactClick: () -> Unit,
+    onDarkModeClick: () -> Unit,
 ) {
 
     TopAppBar(
+
         title = {
             Text(
                 text = stringResource(R.string.title),
                 style = MaterialTheme.typography.titleLarge
             )
         },
+
         actions = {
-            if (showAddContactButton) {
-                IconButton(onClick = { onAddContactClick() }) {
+
+            IconButton(onClick = { onDarkModeClick() }) {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                    contentDescription = stringResource(R.string.settings_darkMode)
+                )
+            }
+
+            if (showActionsButtons) {
+
+                IconButton(onClick = { onFavoritesFilterClick() }) {
                     Icon(
-                        imageVector = Icons.Default.Save,
+                        imageVector = if (isFavoritesFilter) {
+                            Icons.Default.Favorite
+                        } else {
+                            Icons.Default.FavoriteBorder
+                        },
+                        contentDescription = stringResource(R.string.icon_favoritesFilter)
+                    )
+                }
+
+                IconButton(
+                    onClick = { onSortContactClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SortByAlpha,
+                        contentDescription = stringResource(R.string.icon_sort)
+                    )
+                }
+
+                IconButton(
+                    onClick = { onAddContactClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
                         contentDescription = stringResource(R.string.icon_addContact)
                     )
                 }
@@ -50,10 +93,12 @@ fun ContactTopBar(
                 }
             }
         },
+
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
         )
     )
 }

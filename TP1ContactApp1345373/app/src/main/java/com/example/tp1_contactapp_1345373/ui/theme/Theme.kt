@@ -1,6 +1,5 @@
 package com.example.tp1_contactapp_1345373.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

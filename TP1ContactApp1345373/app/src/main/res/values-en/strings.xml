@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">TP1-ContactApp-1345373</string>
-
+    <!-- APP -->
+    <string name="app_name">TP01-ContactApp-1345373</string>
     <string name="title">Contacts</string>
-
-    <string name="no_contacts">No Contact in the list…</string>
+    <string name="label_search">Search…</string>
+    <string name="no_contacts">No Contacts…</string>
+    <string name="no_search_results">No Contact Found…</string>
+    <string name="settings_darkMode">Dark Mode</string>
 
     <!-- TOP BAR -->
     <string name="icon_addContact">Add contact</string>
     <string name="icon_deleteContact">Delete contact</string>
+    <string name="icon_favoritesFilter">Show Favorites</string>
+    <string name="icon_sort">Sort Alphabetical Order</string>
+
+    <string name="icon_search">Search Contact</string>
 
     <!-- FORM LABELS -->
     <string name="label_firstName">First Name</string>
@@ -36,6 +41,6 @@
     <string name="toast_addContact">New Contact Added</string>
     <string name="toast_updateContact">Contact Updated</string>
     <string name="toast_deleteContact">Contact Deleted</string>
-    <string name="toast_emptyField_error">Please fill in all required fields : First Name, Last Name, # Phone Number</string>
+    <string name="toast_emptyField_error">Please fill in all required fields First Name, Last Name, # Phone Number</string>
 
 </resources>

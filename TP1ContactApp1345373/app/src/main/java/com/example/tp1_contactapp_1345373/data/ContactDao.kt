@@ -16,32 +16,20 @@ interface ContactDao {
     suspend fun insert(contact: Contact)
 
     // READ
-    @Query("SELECT * FROM contacts ORDER BY lastName ASC, firstName ASC")
+    @Query("SELECT * FROM contacts")
     fun getAll(): Flow<List<Contact>>
-
-    @Query("SELECT * FROM contacts ORDER by lastName DESC, firstName DESC")
-    fun getAllSortedDescending(): Flow<List<Contact>>
 
     // UPDATE
     @Update
     suspend fun update(contact: Contact)
 
     @Query
-        (
-        """
-            UPDATE contacts
-            SET isFavorite = :favorite
-            WHERE uid = :id
-        """
-    )
+        ("UPDATE contacts SET isFavorite = :favorite WHERE uid = :id" )
     suspend fun setFavorite(id: Int, favorite: Boolean)
 
     // DELETE
     @Delete
     suspend fun delete(contact: Contact)
-
-    @Query("DELETE FROM contacts")
-    suspend fun deleteAll()
 
     // SEARCH
     @Query(
@@ -51,18 +39,7 @@ interface ContactDao {
             OR firstName LIKE '%' || :query || '%'
             OR phoneNumber LIKE '%' || :query || '%'
             OR email LIKE '%' || :query || '%'
-        ORDER BY lastName ASC
     """
     )
     fun search(query: String): Flow<List<Contact>>
-
-    @Query(
-        """
-        SELECT * FROM contacts
-        WHERE isFavorite = 1
-        ORDER BY lastName ASC
-    """
-    )
-    fun getFavorites(): Flow<List<Contact>>
-
 }

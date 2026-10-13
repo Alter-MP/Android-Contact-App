@@ -2,14 +2,11 @@ package com.example.tp1_contactapp_1345373.data
 
 import android.app.Application
 import android.content.ContentValues
-import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,8 +14,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.Collator
+import java.util.Locale
 
 class ContactViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -26,9 +26,33 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         AppDatabase.getDatabase(application.applicationContext).contactDao()
 
     private val stopTimeoutMillis: Long = 5000
+    private val contentResolver = application.contentResolver
 
+    private val collator = Collator.getInstance(Locale.getDefault())
+    private val alphabeticalOrder =
+        compareBy<Contact, String>(collator) { "${it.firstName} ${it.lastName}" }
+
+    val contacts: StateFlow<List<Contact>> = dao.getAll()
+        .map { list -> list.sortedWith(alphabeticalOrder) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = emptyList()
+        )
+
+    // MUTABLE STATES
     var screen by mutableStateOf(Screen.CONTACT_LIST)
+
     var selectedContact by mutableStateOf(Contact())
+    var pendingPhotoUri by mutableStateOf<Uri?>(null)
+
+    var isSortedAlphabeticalOrder by mutableStateOf(true)
+    var showFavorites by mutableStateOf(false)
+
+    var searchQuery by mutableStateOf("")
+
+    var darkMode by mutableStateOf<Boolean?>(null)
+
 
     // NAVIGATION
     fun openExistingContact(contact: Contact) {
@@ -48,7 +72,6 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
     fun saveSelectContact(isExpanded: Boolean = false): ContactSaveStatus {
 
         if (
-
             selectedContact.firstName.isBlank() ||
             selectedContact.lastName.isBlank() ||
             selectedContact.phoneNumber.isBlank()
@@ -57,17 +80,23 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
             return ContactSaveStatus.ERROR_EMPTY_FIELDS
         }
 
-        val existingContact = contacts.value.find { it.uid == selectedContact.uid }
+        val contact = selectedContact.copy(
+            firstName = selectedContact.firstName.trim(),
+            lastName = selectedContact.lastName.trim(),
+            phoneNumber = selectedContact.phoneNumber.trim(),
+            email = selectedContact.email.trim(),
+            address = selectedContact.address.trim(),
+        )
 
         val result =
-            if (existingContact == null) {
+            if (contact.uid == 0) {
 
-                add(selectedContact)
+                add(contact)
                 ContactSaveStatus.ADD
 
             } else {
 
-                update(selectedContact)
+                update(contact)
                 ContactSaveStatus.UPDATE
 
             }
@@ -95,57 +124,61 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
 
     fun cancelFormChange(isExpanded: Boolean = false) {
 
-        if (!isExpanded) {
-            returnToList()
+        if (isExpanded) {
+
+            selectedContact = contacts.value.find { it.uid == selectedContact.uid } ?: Contact()
 
         } else {
-            selectedContact = contacts.value.find { it.uid == selectedContact.uid } ?: Contact()
+            returnToList()
         }
     }
 
     // CAMERA
-    var pendingUri by mutableStateOf<Uri?>(null)
-    var photoUri by mutableStateOf<Uri?>(null)
-
-    fun createImageUri(context: Context): Uri? {
+    fun createImageUri(): Uri? {
 
         val values = ContentValues().apply {
 
-            put(MediaStore.Images.Media.MIME_TYPE, "/image/jpeg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
             put(MediaStore.Images.Media.DISPLAY_NAME, "photo_${System.currentTimeMillis()}.jpg")
         }
 
-        return context.contentResolver.insert(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
-        )
+        val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+
+        pendingPhotoUri = uri
+
+        return uri
+    }
+
+    fun onTakePicture(success: Boolean) {
+
+        val uri = pendingPhotoUri
+
+        if (success && uri != null) {
+            selectedContact = selectedContact.copy(photoUrl = uri.toString())
+        } else if (uri != null) {
+            contentResolver.delete(uri, null, null)
+        }
+
+        pendingPhotoUri = null
+    }
+
+    // GALLERY
+    fun onImageGalleryPicked(uri: Uri?) {
+
+        if (uri != null) {
+
+            contentResolver.takePersistableUriPermission(
+                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+
+            selectedContact = selectedContact.copy(photoUrl = uri.toString())
+        }
     }
 
     // CREATE
     fun add(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {
         dao.insert(contact)
     }
-
-    // READ
-    val contacts: StateFlow<List<Contact>> = dao.getAll()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-            initialValue = emptyList()
-        )
-
-    val favorites: StateFlow<List<Contact>> = dao.getFavorites()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-            initialValue = emptyList()
-        )
-
-    val contactSortedDescending: StateFlow<List<Contact>> = dao.getAllSortedDescending()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-            initialValue = emptyList()
-        )
 
     // UPDATE
     fun update(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {
@@ -161,12 +194,7 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         dao.delete(contact)
     }
 
-    fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
-        dao.deleteAll()
-    }
-
     // SEARCH
-    fun search(query: String): Flow<List<Contact>> {
-        return dao.search(query)
-    }
+    fun search(query: String): Flow<List<Contact>> = dao.search(query)
+        .map { list -> list.sortedWith(alphabeticalOrder) }
 }
