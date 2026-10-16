@@ -1,7 +1,6 @@
 package com.example.tp1_contactapp_1345373
 
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity

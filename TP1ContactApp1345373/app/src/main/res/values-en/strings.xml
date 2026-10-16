@@ -7,6 +7,7 @@
     <string name="no_contacts">No Contacts…</string>
     <string name="no_search_results">No Contact Found…</string>
     <string name="settings_darkMode">Dark Mode</string>
+    <string name="text_limit">Respect the text Limit</string>
 
     <!-- TOP BAR -->
     <string name="icon_addContact">Add contact</string>

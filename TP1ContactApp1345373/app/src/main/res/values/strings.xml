@@ -8,6 +8,8 @@
     <string name="no_contacts">Aucun Contact dans la liste…</string>
     <string name="no_search_results">Aucun Contact trouvé…</string>
     <string name="settings_darkMode">Mode sombre</string>
+    <string name="text_limit">Respecter la limite de texte</string>
+
 
     <!-- TOP BAR -->
     <string name="icon_addContact">Ajouter contact</string>

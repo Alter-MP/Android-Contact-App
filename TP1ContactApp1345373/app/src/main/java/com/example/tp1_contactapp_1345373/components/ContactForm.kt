@@ -1,5 +1,6 @@
 package com.example.tp1_contactapp_1345373.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,32 +16,73 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.tp1_contactapp_1345373.R
 import com.example.tp1_contactapp_1345373.data.Contact
-
 
 @Composable
 private fun ContactFormTextField(
     valueText: String,
     onValueChange: (String) -> Unit,
     labelText: String,
+    isMandatory: Boolean = false,
+    isText: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
+    val context = LocalContext.current
+
+    val message = stringResource(R.string.text_limit)
+
+    var text by remember { mutableStateOf(TextFieldValue("")) }
+
+    var maxChar = 0
+
+    if (isText) {
+        maxChar = 25
+    } else {
+        maxChar = 7
+    }
+
+
     OutlinedTextField(
         valueText,
-        { onValueChange(it) },
+        onValueChange = {
+            if (it.text.lenght <= maxChar) {
+                onValueChange(it)
+            } else {
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            }
+        },
         label = {
-            Text(
-                text = labelText
-            )
+            Row() {
+                Text(
+                    text = labelText
+                )
+                if (isMandatory) {
+                    Text(
+                        text = "*",
+                        color = Color.Red,
+                    )
+                }
+            }
+
         },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = true,
+        supportingText = {
+            Text("${valueText.length} / $maxChar")
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -93,20 +135,25 @@ fun ContactForm(
             contact.firstName,
             { onContactSave(contact.copy(firstName = it)) },
             stringResource(R.string.label_firstName),
+            true,
         )
 
         ContactFormTextField(
             contact.lastName,
             { onContactSave(contact.copy(lastName = it)) },
             stringResource(R.string.label_lastName),
+            true,
         )
 
         ContactFormTextField(
             contact.phoneNumber,
             { onContactSave(contact.copy(phoneNumber = it)) },
             stringResource(R.string.label_phoneNumber),
+            true,
+            isText = false,
             KeyboardType.Phone,
-        )
+
+            )
 
         ContactFormTextField(
             valueText = if (contact.age == null) {
@@ -131,6 +178,8 @@ fun ContactForm(
             contact.email,
             { onContactSave(contact.copy(email = it)) },
             stringResource(R.string.label_email),
+            false,
+            isText = true,
             KeyboardType.Email,
         )
 
