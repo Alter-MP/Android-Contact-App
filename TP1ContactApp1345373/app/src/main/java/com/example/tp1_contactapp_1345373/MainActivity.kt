@@ -45,11 +45,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
 
-            // Taille de la fenêtre
-            // Permet l'affichage dynamique en une ou deux colonne avec l'orientation de l'écran
+            /**
+             * Classe de taille de la fenêtre, recalculée à chaque rotation
+             * Détermine l'affichage en une colonne, portrait, et deux colonnes, paysage
+             */
             val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
 
-            // Thème de l'application suivant le thème du système
+            // Thème de l'application, choix de l'utilisateur ou thème du système
             TP1ContactApp1345373Theme(
                 darkTheme = contactViewModel.darkMode ?: isSystemInDarkTheme()
             ) {
@@ -87,31 +89,37 @@ fun ContactApp(
         widthDpBreakpoint = WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
     )
 
-    // Booelan true, qui détermine l'affichage de la liste et du form en mode paysage
     val isContactsVisible = isExpanded || screen == Screen.CONTACT_LIST
 
-    // Boolean true, qui détermine l'affichage de seulement le form en mode paysage
     val isContactFormVisible = isExpanded || screen == Screen.CONTACT_FORM
 
-    // Initialise le light scheme selon les paramètres du système
     val isDarkMode = contactViewModel.darkMode ?: isSystemInDarkTheme()
 
-    // Requête Room, lors de la recherche de contact
+    // Texte entré dans la barre de recherche, gardé dans le ViewModel pour survivre à la rotation
     val searchQuery = contactViewModel.searchQuery
 
-    // Retient un état d'une liste de contacts selon la recherche
+    /**
+     *  remember(searchQuery) :
+     *      Une nouvelle requête Room est créée seulement quand le texte change
+     *
+     *  ollectAsState transforme le Flow en état Compose:
+     *      L'écran refresh la liste quand les nouveaux résultats arrivent
+     */
     val searchResults by remember(searchQuery) {
         contactViewModel.search(searchQuery)
     }.collectAsState(initial = listOf())
 
-    // Filtre l'affichage des contacts, soit liste complet ou afficher seulement le ou les contacts rechercher
+    /**
+     * Affichage de tous les contacts lorsque que la barre de recherche est vide
+     * S'il y a une recherche, afffiché seulement les résultats
+     */
     val searchedContacts = if (searchQuery.isBlank()) {
         contacts
     } else {
         searchResults
     }
 
-    // Filtre les contacts favoris
+    // Bouton favoris de la TopBar actif, on affiche seulement les contacts favoris
     val filteredContacts = if (contactViewModel.showFavorites) {
         searchedContacts.filter { it.isFavorite }
     } else {
@@ -130,7 +138,7 @@ fun ContactApp(
     val messageAdded = stringResource(R.string.toast_addContact, fullName)
     val messageUpdated = stringResource(R.string.toast_updateContact, fullName)
     val messageDeleted = stringResource(R.string.toast_deleteContact, fullName)
-    val messageEmptyField = stringResource(R.string.toast_emptyField_error, fullName)
+    val messageEmptyField = stringResource(R.string.toast_emptyField_error)
 
     fun showToast(
         message: String,

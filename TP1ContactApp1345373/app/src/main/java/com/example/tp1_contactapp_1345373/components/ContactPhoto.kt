@@ -32,11 +32,11 @@ import com.example.tp1_contactapp_1345373.data.Contact
 
 /**
  * Avatar du contact
- *  Affichage photo s'il y en a une
- *  Affichage initiales pour remplacer photo
- *  Affichage image par défaut pour formulaire de nouveau contact
+ * Affiche, dans l'ordre
+ * 1. Photo du contact de lacaméra ou de la galerie chargée;
+ * 2. Initiales, prénom + nom, dans un cercle de la couleur principale du thème
+ * 3. Nouveau contact, une icône de profil par défaut
  * */
-
 @Composable
 fun ContactPhoto(contact: Contact, modifier: Modifier = Modifier) {
 

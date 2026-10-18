@@ -34,14 +34,18 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
 
     private val contentResolver = application.contentResolver
 
-    // Comparateur alphabétique qui respecte la langue du système
+    /**
+     * Trier en ordre alphabétique
+     * Collator compare les textes selon les règles de la langue de l'appareil
+     * Normalise les accents
+     */
     private val collator = Collator.getInstance(Locale.getDefault())
 
-    // Valeur utiliser pour le triage
+    // Comparateur des contacts, trie par prénom et nom avec le Collator
     private val sortedValue =
         compareBy<Contact, String>(collator) { "${it.firstName} ${it.lastName}" }
 
-    // Tous les contacts, mis à jour par Room et triés par sortedValue
+    // Tous les contacts de Room, triés de A à Z
     val contacts: StateFlow<List<Contact>> = dao.getAll()
         .map { list -> list.sortedWith(sortedValue) }
         .stateIn(
@@ -109,6 +113,11 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         return result
     }
 
+    /**
+     * Ferme le formulaire après un enregistrement ou une suppression
+     * Portrait, retour à la liste
+     * Paysage, le formulaire reste visible
+     */
     private fun completeForm(isExpanded: Boolean) {
 
         returnToList()
@@ -125,6 +134,11 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         completeForm(isExpanded)
     }
 
+    /**
+     * Annule les modifications non enregistrées du formulaire
+     * Portrait, retour à la liste et les modifications ne sont pas enregistrés
+     * Paysage, 2 colonne reload la version enregistrée du contact
+     */
     fun cancelFormChange(isExpanded: Boolean = false) {
 
         if (isExpanded) {
@@ -188,6 +202,7 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         dao.update(contact)
     }
 
+    // Change le favori d'un contact directement dans Room
     fun setFavorite(id: Int, favorite: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         dao.setFavorite(id, favorite)
     }
@@ -198,6 +213,7 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
     }
 
     // SEARCH
+    // Recherche dynamique, les résultats sont triés avec le même comparateur que la liste
     fun search(query: String): Flow<List<Contact>> = dao.search(query)
         .map { list -> list.sortedWith(sortedValue) }
 }

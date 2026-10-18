@@ -68,7 +68,10 @@ private fun ContactItemDetails(
                 style = MaterialTheme.typography.titleMedium
             )
 
-            // Formate le numéro selon le pays de l'appareil
+            /**
+             * PhoneNumberUtils formate le numéro selon le pays de l'appareil
+             * Si le numéro ne peut pas être formaté, on l'affiche tel qu'il a été entré
+             */
             Text(
                 text = PhoneNumberUtils.formatNumber(
                     contact.phoneNumber, locale.platformLocale.country
@@ -78,7 +81,11 @@ private fun ContactItemDetails(
             )
         }
 
-        // Permet de rendre un contact favori à partir de la liste, sans rentrer dans le formulaire
+        /**
+         * Rendre un contact favoris à partir de la liste
+         *  L'étoile change le favori sans ouvrir le formulaire
+         *  Étoile pleine = favori, étoile vide = pas favori
+         */
         IconButton(
             onClick = { onFavoriteClick() }
         ) {
@@ -98,12 +105,14 @@ private fun ContactItemDetails(
 
 
 /**
- * Retourne la lettre d'index du contact ou "#" si ce n'est pas une lettre.
+ * Retourne la lettre de section d'un contact, d'après la première lettre du prénom
+ * Les accents sont normalisés
+ * Les chiffres vont dans la section #
  */
 
 private fun indexContacts(contact: Contact): String {
 
-    // Normaliser les accents pour l'indexation alphabétique de la liste de contacts
+    // NFD Normalise les accents pour l'indexation alphabétique de la liste de contacts, É => E
     val letter =
         Normalizer.normalize(
             contact.firstName.take(1), Normalizer.Form.NFD
@@ -121,7 +130,7 @@ private fun indexContacts(contact: Contact): String {
 }
 
 /**
- * En-tête de section avec # et l'alphabets
+ * En-tête de section avec # et l'alphabets, affiché au-dessus des contacts de cette lettre
  */
 @Composable
 private fun LetterHeaderFormat(letter: String) {
@@ -155,6 +164,7 @@ fun ContactList(
         modifier = modifier.fillMaxSize(),
     ) {
 
+        // Chaque lettre tapée est envoyée au ViewModel
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { onSearchQueryChange(it) },
@@ -191,16 +201,23 @@ fun ContactList(
 
         } else {
 
+            // Regroupe les contacts par lettre de section
             val sortedContactsAlphabetical = contacts.groupBy { indexContacts(it) }
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
             ) {
 
-                sortedContactsAlphabetical.forEach { (letter, contactsIndexLetter) ->
+            // Pour chaque lettre, un en-tête, puis les contacts associé à cette lettre
+            sortedContactsAlphabetical.forEach { (letter, contactsIndexLetter) ->
 
-                    // Clé unique pour chaque en-tête et chaque contact : garde la position du défilement
-                    item(key = "index_$letter") {
+                /**
+                 * Clé unique pour chaque en-tête et chaque contact
+                 * iud pour un contact
+                 *
+                 * Garde la position du défilement
+                 */
+                item(key = "index_$letter") {
                         LetterHeaderFormat(letter)
                     }
 

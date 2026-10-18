@@ -27,6 +27,7 @@ interface ContactDao {
     @Update
     suspend fun update(contact: Contact)
 
+    // // Change seulement la colonne isFavorite d'un contact, sans avoir UPDATE le contact au complet
     @Query("UPDATE contacts SET isFavorite = :favorite WHERE uid = :id")
     suspend fun setFavorite(id: Int, favorite: Boolean)
 
@@ -34,15 +35,20 @@ interface ContactDao {
     @Delete
     suspend fun delete(contact: Contact)
 
-    // SEARCH
+
+    /**
+     * Recherche partielle, LIKE %query%, troue le query recherche n'importeou dans le champ
+     * Cherche dans le prénom, le nom, le numeros de telephone, le courrielle
+     */
     @Query(
         """
         SELECT * FROM contacts
-        WHERE lastName LIKE '%' || :query || '%'
-            OR firstName LIKE '%' || :query || '%'
+        WHERE firstName LIKE '%' || :query || '%'
+            OR lastName LIKE '%' || :query || '%'
             OR phoneNumber LIKE '%' || :query || '%'
             OR email LIKE '%' || :query || '%'
     """
     )
+    // Return un Flow, mise à jour de la liste de contacts durant la recherche
     fun search(query: String): Flow<List<Contact>>
 }
