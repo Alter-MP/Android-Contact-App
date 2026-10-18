@@ -1,3 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TP1-ContactApp-1345373</string>
+
+    <!-- APP -->
+    <string name="app_name">TP01-ContactApp-1345373</string>
+    <string name="title">Contacts</string>
+    <string name="label_search">Search…</string>
+    <string name="no_contacts">No contacts yet…</string>
+    <string name="no_search_results">No contact found…</string>
+    <string name="settings_darkMode">Dark mode</string>
+
+    <!-- TOP BAR -->
+    <string name="icon_addContact">Add contact</string>
+    <string name="icon_deleteContact">Delete contact</string>
+    <string name="icon_favoritesFilter">Show favorites</string>
+    <string name="icon_sort">Sort alphabetically</string>
+    <string name="icon_search">Search contact</string>
+
+    <!-- FORM LABELS -->
+    <string name="label_firstName">First name</string>
+    <string name="label_lastName">Last name</string>
+    <string name="label_phoneNumber">Phone number</string>
+    <string name="label_age">Age</string>
+    <string name="label_email">Email</string>
+    <string name="label_address">Address</string>
+
+    <!-- BUTTONS -->
+    <string name="button_camera">Camera</string>
+    <string name="button_gallery">Gallery</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_save">Save</string>
+    <string name="button_delete">Delete</string>
+
+    <!-- PHOTO -->
+    <string name="desc_contactPhoto">Contact photo</string>
+
+    <!-- FAVORITE -->
+    <string name="icon_favorite">★</string>
+    <string name="favorite">Favorite</string>
+
+    <!-- DIALOG -->
+    <string name="dialog_deleteTitle">Delete contact?</string>
+    <string name="dialog_deleteMessage">%1$s will be permanently deleted.</string>
+
+    <!-- TOASTS -->
+    <string name="toast_addContact">Contact added: %1$s</string>
+    <string name="toast_updateContact">Contact updated: %1$s</string>
+    <string name="toast_deleteContact">Contact deleted: %1$s</string>
+    <string name="toast_emptyField_error">Please fill in the required fields: first name, last name, phone number</string>
+
 </resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- APPLICATION -->
+    <string name="app_name">TP01-ContactApp-1345373</string>
+    <string name="title">Contacts</string>
+    <string name="label_search">Rechercher…</string>
+    <string name="no_contacts">Aucun contact dans la liste…</string>
+    <string name="no_search_results">Aucun contact trouvé…</string>
+    <string name="settings_darkMode">Mode sombre</string>
+
+    <!-- BARRE DU HAUT -->
+    <string name="icon_addContact">Ajouter un contact</string>
+    <string name="icon_deleteContact">Supprimer le contact</string>
+    <string name="icon_favoritesFilter">Afficher les favoris</string>
+    <string name="icon_sort">Trier par ordre alphabétique</string>
+    <string name="icon_search">Rechercher un contact</string>
+
+    <!-- FORMULAIRE -->
+    <string name="label_firstName">Prénom</string>
+    <string name="label_lastName">Nom</string>
+    <string name="label_phoneNumber">Téléphone</string>
+    <string name="label_age">Âge</string>
+    <string name="label_email">Courriel</string>
+    <string name="label_address">Adresse</string>
+
+    <!-- BOUTONS -->
+    <string name="button_camera">Caméra</string>
+    <string name="button_gallery">Galerie</string>
+    <string name="button_cancel">Annuler</string>
+    <string name="button_save">Enregistrer</string>
+    <string name="button_delete">Supprimer</string>
+
+    <!-- PHOTO -->
+    <string name="desc_contactPhoto">Photo du contact</string>
+
+    <!-- FAVORI -->
+    <string name="icon_favorite">★</string>
+    <string name="favorite">Favori</string>
+
+    <!-- BOÎTE DE DIALOGUE -->
+    <string name="dialog_deleteTitle">Supprimer le contact ?</string>
+    <string name="dialog_deleteMessage">%1$s sera supprimé définitivement.</string>
+
+    <!-- TOASTS -->
+    <string name="toast_addContact">Contact ajouté : %1$s</string>
+    <string name="toast_updateContact">Contact modifié : %1$s</string>
+    <string name="toast_deleteContact">Contact supprimé : %1$s</string>
+    <string name="toast_emptyField_error">Veuillez remplir les champs obligatoires : prénom, téléphone</string>
+
+</resources>
