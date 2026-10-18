@@ -30,6 +30,13 @@ import coil3.compose.AsyncImage
 import com.example.tp1_contactapp_1345373.R
 import com.example.tp1_contactapp_1345373.data.Contact
 
+/**
+ * Avatar du contact
+ *  Affichage photo s'il y en a une
+ *  Affichage initiales pour remplacer photo
+ *  Affichage image par défaut pour formulaire de nouveau contact
+ * */
+
 @Composable
 fun ContactPhoto(contact: Contact, modifier: Modifier = Modifier) {
 
@@ -40,12 +47,13 @@ fun ContactPhoto(contact: Contact, modifier: Modifier = Modifier) {
         modifier = modifier,
     ) {
 
+        // Marge et forme ronde, proportionnelles à la taille de l'avatar
         val photoModifier = Modifier
             .fillMaxSize()
             .padding(maxWidth / 12)
             .clip((CircleShape))
 
-        val initialsFontSize = (maxWidth.value * 0.4f).sp
+        val initialsFontSize = (maxWidth.value * 0.3f).sp
 
         when {
 
@@ -91,24 +99,31 @@ fun ContactPhotoButtons(
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+
         Button(onClick = { onCameraClick() }) {
-            Text(
-                text = stringResource(R.string.button_camera)
-            )
-            Icon(
-                imageVector = Icons.Default.PhotoCamera,
-                contentDescription = stringResource(R.string.button_camera)
-            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.button_camera)
+                )
+                Icon(
+                    imageVector = Icons.Default.PhotoCamera,
+                    contentDescription = stringResource(R.string.button_camera)
+                )
+            }
         }
 
         Button(onClick = { onGalleryClick() }) {
-            Text(
-                text = stringResource(R.string.button_gallery)
-            )
-            Icon(
-                imageVector = Icons.Default.PhotoAlbum,
-                contentDescription = stringResource(R.string.button_gallery)
-            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.button_gallery)
+                )
+                Icon(
+                    imageVector = Icons.Default.PhotoAlbum,
+                    contentDescription = stringResource(R.string.button_gallery)
+                )
+            }
         }
     }
 }

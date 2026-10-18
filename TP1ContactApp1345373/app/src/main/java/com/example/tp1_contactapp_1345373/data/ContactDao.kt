@@ -8,6 +8,10 @@ import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Requêtes Room sur la l'entité contacts
+ * Actions CRUD et de recherche
+ */
 @Dao
 interface ContactDao {
 
@@ -23,8 +27,7 @@ interface ContactDao {
     @Update
     suspend fun update(contact: Contact)
 
-    @Query
-        ("UPDATE contacts SET isFavorite = :favorite WHERE uid = :id" )
+    @Query("UPDATE contacts SET isFavorite = :favorite WHERE uid = :id")
     suspend fun setFavorite(id: Int, favorite: Boolean)
 
     // DELETE

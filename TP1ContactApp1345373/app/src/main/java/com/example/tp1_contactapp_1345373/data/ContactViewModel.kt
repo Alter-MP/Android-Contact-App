@@ -20,37 +20,43 @@ import kotlinx.coroutines.launch
 import java.text.Collator
 import java.util.Locale
 
+/**
+ * ViewModel de l'application
+ * Gestion de l'état de l'interface pour qu'il survive à la rotation, et fait le lien avec la base de données Room
+ */
 class ContactViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dao: ContactDao =
         AppDatabase.getDatabase(application.applicationContext).contactDao()
 
+    // Délai réutilisable
     private val stopTimeoutMillis: Long = 5000
+
     private val contentResolver = application.contentResolver
 
+    // Comparateur alphabétique qui respecte la langue du système
     private val collator = Collator.getInstance(Locale.getDefault())
-    private val alphabeticalOrder =
+
+    // Valeur utiliser pour le triage
+    private val sortedValue =
         compareBy<Contact, String>(collator) { "${it.firstName} ${it.lastName}" }
 
+    // Tous les contacts, mis à jour par Room et triés par sortedValue
     val contacts: StateFlow<List<Contact>> = dao.getAll()
-        .map { list -> list.sortedWith(alphabeticalOrder) }
+        .map { list -> list.sortedWith(sortedValue) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
             initialValue = emptyList()
         )
 
-    // MUTABLE STATES
+    // ÉTATS DE L'INTERFACE
     var screen by mutableStateOf(Screen.CONTACT_LIST)
-
     var selectedContact by mutableStateOf(Contact())
     var pendingPhotoUri by mutableStateOf<Uri?>(null)
-
     var isSortedAlphabeticalOrder by mutableStateOf(true)
     var showFavorites by mutableStateOf(false)
-
     var searchQuery by mutableStateOf("")
-
     var darkMode by mutableStateOf<Boolean?>(null)
 
 
@@ -59,11 +65,9 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         selectedContact = contact
         screen = Screen.CONTACT_FORM
     }
-
     fun openNewContact() {
         openExistingContact(Contact())
     }
-
     fun returnToList() {
         screen = Screen.CONTACT_LIST
     }
@@ -73,7 +77,6 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
 
         if (
             selectedContact.firstName.isBlank() ||
-            selectedContact.lastName.isBlank() ||
             selectedContact.phoneNumber.isBlank()
 
         ) {
@@ -196,5 +199,5 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
 
     // SEARCH
     fun search(query: String): Flow<List<Contact>> = dao.search(query)
-        .map { list -> list.sortedWith(alphabeticalOrder) }
+        .map { list -> list.sortedWith(sortedValue) }
 }

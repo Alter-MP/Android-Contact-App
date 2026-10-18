@@ -3,7 +3,9 @@ package com.example.tp1_contactapp_1345373.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-// Table de données backend
+/**
+ * Contact enregistré dans la table/ entité Room : contacts
+ */
 @Entity(tableName = "contacts")
 data class Contact (
     @PrimaryKey(autoGenerate = true)

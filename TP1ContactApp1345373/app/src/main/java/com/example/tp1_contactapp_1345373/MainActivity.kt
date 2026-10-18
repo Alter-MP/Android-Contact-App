@@ -31,14 +31,13 @@ import com.example.tp1_contactapp_1345373.components.ContactBottomBar
 import com.example.tp1_contactapp_1345373.components.ContactForm
 import com.example.tp1_contactapp_1345373.components.ContactList
 import com.example.tp1_contactapp_1345373.components.ContactTopBar
+import com.example.tp1_contactapp_1345373.data.Contact
 import com.example.tp1_contactapp_1345373.data.ContactSaveStatus
 import com.example.tp1_contactapp_1345373.data.ContactViewModel
 import com.example.tp1_contactapp_1345373.data.Screen
 import com.example.tp1_contactapp_1345373.ui.theme.TP1ContactApp1345373Theme
 
 class MainActivity : ComponentActivity() {
-
-    // private val TAG = "CONTACT"
     private val contactViewModel: ContactViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +45,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
 
+            // Taille de la fenêtre
+            // Permet l'affichage dynamique en une ou deux colonne avec l'orientation de l'écran
             val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
 
+            // Thème de l'application suivant le thème du système
             TP1ContactApp1345373Theme(
                 darkTheme = contactViewModel.darkMode ?: isSystemInDarkTheme()
             ) {
@@ -57,6 +59,19 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+    Écran principal de l'application
+    Mode compact portrait / vertical :
+        affiche la liste de contact OU le formulaire de contact selon Screen
+
+    Mode étendu paysage/ horizontal :
+        affiche la liste de contact et le formulaire contact côte à côte
+
+    Gestion:
+        Toast dynamique selon l'intéraction de l'utilisateur
+        Ouverture de la caméra
+        Accès à la galerie de photos
+ */
 @Composable
 fun ContactApp(
     contactViewModel: ContactViewModel,
@@ -69,29 +84,41 @@ fun ContactApp(
     val selectedContact = contactViewModel.selectedContact
 
     val isExpanded = windowSizeClass.isWidthAtLeastBreakpoint(
-        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+        widthDpBreakpoint = WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
     )
+
+    // Booelan true, qui détermine l'affichage de la liste et du form en mode paysage
     val isContactsVisible = isExpanded || screen == Screen.CONTACT_LIST
+
+    // Boolean true, qui détermine l'affichage de seulement le form en mode paysage
     val isContactFormVisible = isExpanded || screen == Screen.CONTACT_FORM
+
+    // Initialise le light scheme selon les paramètres du système
     val isDarkMode = contactViewModel.darkMode ?: isSystemInDarkTheme()
 
+    // Requête Room, lors de la recherche de contact
     val searchQuery = contactViewModel.searchQuery
+
+    // Retient un état d'une liste de contacts selon la recherche
     val searchResults by remember(searchQuery) {
         contactViewModel.search(searchQuery)
     }.collectAsState(initial = listOf())
 
+    // Filtre l'affichage des contacts, soit liste complet ou afficher seulement le ou les contacts rechercher
     val searchedContacts = if (searchQuery.isBlank()) {
         contacts
     } else {
         searchResults
     }
 
+    // Filtre les contacts favoris
     val filteredContacts = if (contactViewModel.showFavorites) {
         searchedContacts.filter { it.isFavorite }
     } else {
         searchedContacts
     }
 
+    // Triage ASC ou DESC de la liste de contacts afficher, filter, rechercher
     val displayedContacts = if (contactViewModel.isSortedAlphabeticalOrder) {
         filteredContacts
     } else {
@@ -99,11 +126,11 @@ fun ContactApp(
     }
 
     val context = LocalContext.current
-    val messageAdded = stringResource(R.string.toast_addContact)
-    val messageUpdated = stringResource(R.string.toast_updateContact)
-    val messageDeleted = stringResource(R.string.toast_deleteContact)
-    val messageEmptyField = stringResource(R.string.toast_emptyField_error)
-    val fullName = "${selectedContact.firstName} ${selectedContact.lastName}"
+    val fullName = "${selectedContact.firstName} ${selectedContact.lastName}".trim()
+    val messageAdded = stringResource(R.string.toast_addContact, fullName)
+    val messageUpdated = stringResource(R.string.toast_updateContact, fullName)
+    val messageDeleted = stringResource(R.string.toast_deleteContact, fullName)
+    val messageEmptyField = stringResource(R.string.toast_emptyField_error, fullName)
 
     fun showToast(
         message: String,
@@ -116,19 +143,19 @@ fun ContactApp(
 
         when (contactViewModel.saveSelectContact(isExpanded)) {
 
-            ContactSaveStatus.ADD -> showToast("$messageAdded : $fullName")
+            ContactSaveStatus.ADD -> showToast(messageAdded)
+
             ContactSaveStatus.UPDATE -> showToast(messageUpdated)
 
             ContactSaveStatus.ERROR_EMPTY_FIELDS -> showToast(
-                messageEmptyField,
-                Toast.LENGTH_LONG
+                messageEmptyField, duration = Toast.LENGTH_LONG
             )
         }
     }
 
     fun deleteSelectedContact() {
         contactViewModel.deleteSelectedContact(isExpanded)
-        showToast( "$messageDeleted : $fullName")
+        showToast(messageDeleted)
     }
 
     val takePicture = rememberLauncherForActivityResult(
@@ -142,10 +169,10 @@ fun ContactApp(
         val uri = contactViewModel.createImageUri() ?: return
 
         try {
-            takePicture.launch(uri)
+            takePicture.launch(input = uri)
 
-        } catch (e: ActivityNotFoundException) {
-            contactViewModel.onTakePicture(false)
+        } catch (_: ActivityNotFoundException) {
+            contactViewModel.onTakePicture(success = false)
         }
     }
 
@@ -156,9 +183,18 @@ fun ContactApp(
     }
 
     fun openGalleryApp() {
-        pickImageGallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        pickImageGallery.launch(input = PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
+    /**
+     * TopBar : Affiche le titre et des boutons d'actions
+     *      bouton Supprimer s'affiche seulement pour un contact déjà enregistré
+     *
+     * BottomBar : Affiche les boutons d'action du form
+     *      s'affiche seulement quand le formulaire est visible
+     *
+     * imePadding : le contenu est au-dessus le clavier
+     */
     Scaffold(
         topBar = {
             ContactTopBar(
@@ -171,8 +207,11 @@ fun ContactApp(
                 onFavoritesFilterClick = {
                     contactViewModel.showFavorites = !contactViewModel.showFavorites
                 },
-                onSortContactClick = { contactViewModel.isSortedAlphabeticalOrder = !contactViewModel.isSortedAlphabeticalOrder },
-                onDarkModeClick = { contactViewModel.darkMode = !isDarkMode},
+                onSortContactClick = {
+                    contactViewModel.isSortedAlphabeticalOrder =
+                        !contactViewModel.isSortedAlphabeticalOrder
+                },
+                onDarkModeClick = { contactViewModel.darkMode = !isDarkMode },
             )
         },
         bottomBar = {
@@ -193,15 +232,12 @@ fun ContactApp(
 
             isExpanded -> Row(
                 modifier = Modifier
-                    .padding(innerPadding)
+                    .padding(paddingValues = innerPadding)
                     .fillMaxSize()
             ) {
-                ContactList(
+                ContactListPanel(
+                    contactViewModel = contactViewModel,
                     contacts = displayedContacts,
-                    searchQuery = searchQuery,
-                    onContactClick = { contactViewModel.openExistingContact(it) },
-                    onSearchQueryChange = { contactViewModel.searchQuery = it },
-                    onFavoriteClick = { contactViewModel.setFavorite(it.uid, !it.isFavorite) },
                     modifier = Modifier
                         .weight(0.3f)
                         .fillMaxHeight()
@@ -209,9 +245,8 @@ fun ContactApp(
 
                 VerticalDivider()
 
-                ContactForm(
-                    contact = selectedContact,
-                    onContactSave = { contactViewModel.selectedContact = it },
+                ContactFormPanel(
+                    contactViewModel = contactViewModel,
                     onCameraClick = { activateCamera() },
                     onGalleryClick = { openGalleryApp() },
                     modifier = Modifier
@@ -220,26 +255,58 @@ fun ContactApp(
                 )
             }
 
-            screen == Screen.CONTACT_LIST -> ContactList(
+            screen == Screen.CONTACT_LIST -> ContactListPanel(
+                contactViewModel = contactViewModel,
                 contacts = displayedContacts,
-                searchQuery = searchQuery,
-                onContactClick = { contactViewModel.openExistingContact(it) },
-                onFavoriteClick = { contactViewModel.setFavorite(it.uid, !it.isFavorite) },
-                onSearchQueryChange = { contactViewModel.searchQuery = it },
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(paddingValues = innerPadding)
             )
 
-            else -> ContactForm(
-                contact = selectedContact,
-                onContactSave = { contactViewModel.selectedContact = it },
+            else -> ContactFormPanel(
+                contactViewModel = contactViewModel,
                 onCameraClick = { activateCamera() },
                 onGalleryClick = { openGalleryApp() },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier.padding(paddingValues = innerPadding)
             )
         }
     }
 }
 
+/**
+ * Relie le composant ContactList au ViewModel
+ * Utilisé en portrait et en mode deux colonnes
+ */
+@Composable
+private fun ContactListPanel(
+    contactViewModel: ContactViewModel,
+    contacts: List<Contact>,
+    modifier: Modifier = Modifier
+) {
+    ContactList(
+        contacts = contacts,
+        searchQuery = contactViewModel.searchQuery,
+        onContactClick = { contactViewModel.openExistingContact(it) },
+        onFavoriteClick = { contactViewModel.setFavorite(it.uid, !it.isFavorite) },
+        onSearchQueryChange = { contactViewModel.searchQuery = it },
+        modifier = modifier
+    )
+}
 
-
-
+/**
+ * Relie le composant ContactForm au ViewModel.
+ * Utilisé en portrait et en mode deux colonnes
+ */
+@Composable
+private fun ContactFormPanel(
+    contactViewModel: ContactViewModel,
+    onCameraClick: () -> Unit,
+    onGalleryClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ContactForm(
+        contact = contactViewModel.selectedContact,
+        onContactSave = { contactViewModel.selectedContact = it },
+        onCameraClick = onCameraClick,
+        onGalleryClick = onGalleryClick,
+        modifier = modifier
+    )
+}

@@ -2,9 +2,12 @@ package com.example.tp1_contactapp_1345373.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.tp1_contactapp_1345373.R
 
+/**
+ * BottomBar : afficher seulement si formulaire est visible
+ *  Boutons Annuler et Enregistrer
+ */
 @Composable
 fun ContactBottomBar(
     onCancelClick: () -> Unit,
@@ -26,7 +33,10 @@ fun ContactBottomBar(
 ) {
 
     BottomAppBar(
-        containerColor = Color.Transparent
+        containerColor = Color.Transparent,
+        contentPadding = PaddingValues(0.dp),
+        windowInsets = WindowInsets(0),
+        modifier = Modifier.navigationBarsPadding().height(56.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -57,7 +67,6 @@ fun ContactBottomBar(
                     .clickable { onSaveContactClick() }
                     .padding(horizontal = 24.dp, vertical = 12.dp)
             )
-
         }
     }
 }

@@ -19,6 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.tp1_contactapp_1345373.R
 
+/**
+ * TopBar : titre de l'application et boutons d'actions
+ *  mode sombre, filtre des favoris, tri et ajout.
+ *  bouton de suppresion si contact existant
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactTopBar(

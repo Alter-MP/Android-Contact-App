@@ -1,6 +1,5 @@
 package com.example.tp1_contactapp_1345373.components
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,24 +11,34 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.tp1_contactapp_1345373.R
 import com.example.tp1_contactapp_1345373.data.Contact
+
+
+private const val MAX_LENGTH_TEXT = 255
+private const val MAX_LENGTH_PHONE = 10
+private const val MAX_LENGTH_AGE = 3
+
+/**
+ * Champ texte du formulaire
+ *  Limite de caractères,
+ *  Compteur de caractères
+ *  Astérisque si champs obligatoire
+ *  Calvier adapté pour les champs
+ */
 
 @Composable
 private fun ContactFormTextField(
@@ -37,42 +46,26 @@ private fun ContactFormTextField(
     onValueChange: (String) -> Unit,
     labelText: String,
     isMandatory: Boolean = false,
-    isText: Boolean = false,
+    maxLength: Int = MAX_LENGTH_TEXT,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
-    val context = LocalContext.current
-
-    val message = stringResource(R.string.text_limit)
-
-    var text by remember { mutableStateOf(TextFieldValue("")) }
-
-    var maxChar = 0
-
-    if (isText) {
-        maxChar = 25
-    } else {
-        maxChar = 7
-    }
-
 
     OutlinedTextField(
         valueText,
-        onValueChange = {
-            if (it.text.lenght <= maxChar) {
-                onValueChange(it)
-            } else {
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        onValueChange = { typingText ->
+            if (typingText.length <= maxLength) {
+                onValueChange(typingText)
             }
         },
         label = {
-            Row() {
+            Row {
                 Text(
                     text = labelText
                 )
                 if (isMandatory) {
                     Text(
                         text = "*",
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
             }
@@ -81,7 +74,7 @@ private fun ContactFormTextField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = true,
         supportingText = {
-            Text("${valueText.length} / $maxChar")
+            Text("${valueText.length} / $maxLength")
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -106,10 +99,19 @@ private fun FavoriteCheckbox(
         Text(
             text = stringResource(R.string.favorite)
         )
+        Icon(
+            imageVector = Icons.Default.Favorite,
+            tint = MaterialTheme.colorScheme.primary,
+            contentDescription = null,
+        )
+
     }
 }
 
-
+/**
+ * Formulaire du contact, réutilisé pour la création ET la modification
+ * Chaque changement renvoie une copie du contact au ViewModel
+ */
 @Composable
 fun ContactForm(
     contact: Contact,
@@ -131,27 +133,32 @@ fun ContactForm(
 
         ContactPhotoButtons(onCameraClick = onCameraClick, onGalleryClick = onGalleryClick)
 
-        ContactFormTextField(
-            contact.firstName,
-            { onContactSave(contact.copy(firstName = it)) },
-            stringResource(R.string.label_firstName),
-            true,
+        FavoriteCheckbox(
+            isFavorite = contact.isFavorite,
+            onFavoriteChange = { onContactSave(contact.copy(isFavorite = it)) }
         )
 
         ContactFormTextField(
-            contact.lastName,
-            { onContactSave(contact.copy(lastName = it)) },
-            stringResource(R.string.label_lastName),
-            true,
+            valueText = contact.firstName,
+            onValueChange = { onContactSave(contact.copy(firstName = it)) },
+            labelText = stringResource(R.string.label_firstName),
+            isMandatory = true,
         )
 
         ContactFormTextField(
-            contact.phoneNumber,
-            { onContactSave(contact.copy(phoneNumber = it)) },
-            stringResource(R.string.label_phoneNumber),
-            true,
-            isText = false,
-            KeyboardType.Phone,
+            valueText = contact.lastName,
+            onValueChange = { onContactSave(contact.copy(lastName = it)) },
+            labelText = stringResource(R.string.label_lastName),
+
+        )
+
+        ContactFormTextField(
+            valueText = contact.phoneNumber,
+            onValueChange = { onContactSave(contact.copy(phoneNumber = it)) },
+            labelText = stringResource(R.string.label_phoneNumber),
+            isMandatory = true,
+            maxLength = MAX_LENGTH_PHONE,
+            keyboardType = KeyboardType.Phone,
 
             )
 
@@ -170,28 +177,24 @@ fun ContactForm(
                 onContactSave(contact.copy(age = newAge))
             },
             labelText = stringResource(R.string.label_age),
+            maxLength = MAX_LENGTH_AGE,
             keyboardType = KeyboardType.Number
 
         )
 
         ContactFormTextField(
-            contact.email,
-            { onContactSave(contact.copy(email = it)) },
-            stringResource(R.string.label_email),
-            false,
-            isText = true,
-            KeyboardType.Email,
+            valueText = contact.email,
+            onValueChange = { onContactSave(contact.copy(email = it)) },
+            labelText = stringResource(R.string.label_email),
+            isMandatory = false,
+            maxLength = MAX_LENGTH_TEXT,
+            keyboardType = KeyboardType.Email,
         )
 
         ContactFormTextField(
-            contact.address,
-            { onContactSave(contact.copy(address = it)) },
-            stringResource(R.string.label_address),
-        )
-
-        FavoriteCheckbox(
-            isFavorite = contact.isFavorite,
-            onFavoriteChange = { onContactSave(contact.copy(isFavorite = it)) }
+            valueText = contact.address,
+            onValueChange = { onContactSave(contact.copy(address = it)) },
+            labelText = stringResource(R.string.label_address),
         )
     }
 }

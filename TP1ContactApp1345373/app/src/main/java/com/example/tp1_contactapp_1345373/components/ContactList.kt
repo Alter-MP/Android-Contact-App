@@ -35,6 +35,13 @@ import com.example.tp1_contactapp_1345373.R
 import com.example.tp1_contactapp_1345373.data.Contact
 import java.text.Normalizer
 
+/**
+ * Ligne d'un contact de la lsite
+ *  Photo
+ *  Prénom + Nom,
+ *  Téléphone formaté
+ *  IconButton étoile de favori
+ */
 
 @Composable
 private fun ContactItemDetails(
@@ -61,6 +68,7 @@ private fun ContactItemDetails(
                 style = MaterialTheme.typography.titleMedium
             )
 
+            // Formate le numéro selon le pays de l'appareil
             Text(
                 text = PhoneNumberUtils.formatNumber(
                     contact.phoneNumber, locale.platformLocale.country
@@ -70,6 +78,7 @@ private fun ContactItemDetails(
             )
         }
 
+        // Permet de rendre un contact favori à partir de la liste, sans rentrer dans le formulaire
         IconButton(
             onClick = { onFavoriteClick() }
         ) {
@@ -87,8 +96,14 @@ private fun ContactItemDetails(
     }
 }
 
+
+/**
+ * Retourne la lettre d'index du contact ou "#" si ce n'est pas une lettre.
+ */
+
 private fun indexContacts(contact: Contact): String {
 
+    // Normaliser les accents pour l'indexation alphabétique de la liste de contacts
     val letter =
         Normalizer.normalize(
             contact.firstName.take(1), Normalizer.Form.NFD
@@ -105,6 +120,9 @@ private fun indexContacts(contact: Contact): String {
     }
 }
 
+/**
+ * En-tête de section avec # et l'alphabets
+ */
 @Composable
 private fun LetterHeaderFormat(letter: String) {
     Text(
@@ -119,6 +137,10 @@ private fun LetterHeaderFormat(letter: String) {
     )
 }
 
+/**
+ * Barre de recherche
+ * Liste des contacts groupés par lettre
+ */
 @Composable
 fun ContactList(
     contacts: List<Contact>,
@@ -177,6 +199,7 @@ fun ContactList(
 
                 sortedContactsAlphabetical.forEach { (letter, contactsIndexLetter) ->
 
+                    // Clé unique pour chaque en-tête et chaque contact : garde la position du défilement
                     item(key = "index_$letter") {
                         LetterHeaderFormat(letter)
                     }
@@ -188,8 +211,8 @@ fun ContactList(
 
                         ContactItemDetails(
                             contact,
-                            { onContactClick(contact) },
-                            { onFavoriteClick(contact) }
+                            onContactDetailsClick = { onContactClick(contact) },
+                            onFavoriteClick = { onFavoriteClick(contact) }
                         )
 
                         HorizontalDivider()
